@@ -1,0 +1,35 @@
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+.test{
+    color: #ee6e73;
+}
+
+.collection a.collection-item {
+
+    display: block;
+    -webkit-transition: .25s;
+    transition: .25s;
+    color: #ee6e73;
+}
+p{
+    text-align: justify;
+}
+footer{
+    height: 50px;
+}
+
+
+
+
+
+
+
+
+
