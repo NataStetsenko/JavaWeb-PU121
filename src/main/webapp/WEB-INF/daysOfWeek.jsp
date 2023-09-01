@@ -1,23 +1,7 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: Natali
-  Date: 30.08.2023
-  Time: 17:11
-  To change this template use File | Settings | File Templates.
---%>
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"  media="screen,projection"/>
-  <link type="text/css" rel="stylesheet" href="style.css"/>
-  <link type="text/css" rel="stylesheet" href="normalize.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-</head>
-<body>
+
 <div class="container ">
-  <jsp:include page="nav.jsp"></jsp:include>
   <div class="card-panel  grey lighten-5">
     <table >
       <tr>
@@ -42,6 +26,5 @@
       %>
     </table>
   </div>
-<jsp:include page="footer.jsp"></jsp:include></div>
-</body>
-</html>
+</div>
+
