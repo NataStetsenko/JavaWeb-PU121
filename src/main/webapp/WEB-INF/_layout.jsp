@@ -1,5 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
+    StringBuffer url = request.getRequestURL();
+    String url2 = url.toString();
+    String url3  = url2.replaceAll("WEB-INF/_layout.jsp", "");
     String contextPath = request.getContextPath();
     String azurePath = "https://app-javaweb-pu121.azurewebsites.net/";
 
@@ -10,7 +13,6 @@
                     + ".jsp";          // Параметри можна модифікувати
     //
 %>
-
 <html>
 <head>
     <meta charset="UTF-8">
@@ -28,16 +30,15 @@
 </head>
 <nav>
     <div class="nav-wrapper container">
-<%--        <a href="<%=azurePath%>" class="brand-logo" style="margin-left: 10px">Logo</a>--%>
-<a href="<%=contextPath%>" class="brand-logo" style="margin-left: 10px">Logo</a>
+<a href="<%=url3%>" class="brand-logo" style="margin-left: 10px">Logo</a>
 
 <ul id="nav-mobile" class="right hide-on-med-and-down">
     <li <% if ("jsp.jsp".equals(pageName)) { %> class="active" <% } %> >
-        <a href="<%=contextPath%>/jsp">JSP</a>
+        <a href="<%=url3%>jsp">JSP</a>
 
     </li>
     <li <% if ("servlet.jsp".equals(pageName)) { %> class="active" <% } %> >
-        <a href="<%=contextPath%>/servlet">Servlet</a>
+        <a href="<%=url3%>servlet">Servlet</a>
     </li>
     <li><a href="#">JavaWeb</a></li>
 </ul>
@@ -45,7 +46,7 @@
 </nav>
 <body>
 <jsp:include page="<%=pageName%>"/>
-
+<p>Path: <%=url3%></p>
 
 <script type="text/javascript"
 src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
@@ -55,6 +56,7 @@ src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min
 <div class="container">
     © 2023 Java web
     <a class="grey-text text-lighten-4 right" href="#!">More Links</a>
+
 </div>
 </div>
 </footer>
