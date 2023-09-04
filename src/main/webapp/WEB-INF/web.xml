@@ -4,6 +4,24 @@
 
 <web-app>
     <display-name>Archetype Created Web Application</display-name>
+<!--    <filter>-->
+<!--        <filter-name>Charset</filter-name>-->
+<!--        <filter-class>step.learning.filters.CharsetFilter</filter-class>-->
+<!--    </filter>-->
+<!--    <filter-mapping>-->
+<!--        <filter-name>Charset</filter-name>-->
+<!--        <url-pattern>*</url-pattern>-->
+<!--    </filter-mapping>-->
+
+    <filter>
+        <filter-name>LogFilter</filter-name>
+        <filter-class>step.learning.filters.LogFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>LogFilter</filter-name>
+        <url-pattern>*</url-pattern>
+    </filter-mapping>
+
     <servlet>
         <servlet-name>Home</servlet-name>
         <servlet-class>step.learning.servlets.HomeServlet</servlet-class>
@@ -12,4 +30,5 @@
         <servlet-name>Home</servlet-name>
         <url-pattern></url-pattern>
     </servlet-mapping>
+
 </web-app>
