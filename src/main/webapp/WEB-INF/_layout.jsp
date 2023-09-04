@@ -5,7 +5,7 @@
     String url3  = url2.replaceAll("WEB-INF/_layout.jsp", "");
     String contextPath = request.getContextPath();
     String azurePath = "https://app-javaweb-pu121.azurewebsites.net/";
-
+    String uri = request.getRequestURI();
     String pageName =                   // Вилучаємо значення атрибуту (закладеного у сервлеті)
             (String)                    // оскільки значення Object, необхідне пряме перетворення
                     request             // об'єкт request доступний у всіх JSP незалежно від сервлетів
@@ -46,7 +46,7 @@
 </nav>
 <body>
 <jsp:include page="<%=pageName%>"/>
-<p>Path: <%=url3%></p>
+<p>Path: <%=uri%></p>
 
 <script type="text/javascript"
 src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
