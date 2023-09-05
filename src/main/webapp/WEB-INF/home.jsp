@@ -3,17 +3,28 @@
 <div class="container">
 
     <div class="row">
-        <div class="col s12 m4 l3 ">
+        <div class="col s12 m5 l3 ">
             <div class="collection card">
-                <a href="daysOfWeek" class="collection-item"><span class="red-text text-lighten-3">
+                <a href="daysOfWeek" class="collection-item">
+                    <span class="red-text text-lighten-3">
                     <span class="badge red-text text-lighten-3">1</span>Homework 1</span></a>
-                <a href="partsOfUrl" class="collection-item"><span class="red-text text-lighten-3">
-                    <span class="new badge red lighten-3">1</span>Homework 2</span></a>
-                <a href="#!" class="collection-item"><span class="red-text text-lighten-3">Homework 3</span></a>
-                <a href="#!" class="collection-item"><span class="red-text text-lighten-3">Homework 4</span></a>
+                <a href="partsOfUrl" class="collection-item">
+                 <span class="red-text text-lighten-3">
+                    <span class="badge red-text text-lighten-3">1</span>Homework 2</span></a>
+                <a href="hash" class="collection-item">
+                    <span class="red-text text-lighten-3">
+                         <span class="new badge red lighten-3">1</span>Homework 4</span></a>
+                <a href="#!" class="collection-item"><span class="red-text text-lighten-3">Homework 5</span></a>
             </div>
         </div>
-        <div class="col s12 m8 l9">
+        <div style="position: fixed; left: 64%; top: 13%">
+            <form action="home" method="post">
+                   <button class="btn waves-effect waves-light" type="submit" name="action">Текстовый файл отчета
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
+        </div>
+        <div class="col s12 m7 l9">
             <div class="card-panel">
                 <h1 class="center-align red-text text-lighten-3">Java web</h1>
                 <p>
@@ -48,7 +59,7 @@
                     &lt;%@ page contentType="text/html;charset=UTF-8" %>
                     та додаємо тег &lt;meta charset="utf-8" /> у заголовок HTML
                 </p>
-                <p>
+                <p class="test">
                     Деплой проєкту виглядає наступним чином: <br/>
                     - відбувається збірка (...war_exploded war - web archive)<br/>
                     - цей архів переноситься у спеціальну папку, на яку "дивиться" сервер<br/>

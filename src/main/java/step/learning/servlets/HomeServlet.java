@@ -1,10 +1,18 @@
 package step.learning.servlets;
+import com.google.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
+@Singleton
 public class HomeServlet extends HttpServlet {   // назва класу - довільна
     @Override
     protected void doGet(                    // назва методу - саме так (варації не допускаються)
@@ -24,6 +32,39 @@ public class HomeServlet extends HttpServlet {   // назва класу - до
                 .getRequestDispatcher(           // до іншого обробника - ***.jsp
                         "WEB-INF/_layout.jsp" )  // для того щоб прибрати прямий доступ до ***.jsp його
                 .forward( request, response ) ;  // переміщують у закриту папку WEB-INF
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        List<String> buf = new ArrayList<>();
+       try (FileReader reader = new FileReader("notebook.txt");
+            Scanner scanner = new Scanner(reader)) {
+            while (scanner.hasNext()) {
+                buf.add(scanner.nextLine());
+            }
+       }
+        catch (IOException ex)
+        {
+            System.out.println(ex.getMessage());
+       }
+        try {
+            FileWriter fileWriter = new FileWriter("D:\\text.txt");
+            // Создаем BufferedWriter для более эффективной записи
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            // Перебираем список строк и записываем их в файл
+            for (String line : buf) {
+                bufferedWriter.write(line);
+                bufferedWriter.newLine(); // Добавляем перевод строки между строками
+            }
+            // Закрываем BufferedWriter и FileWriter
+            bufferedWriter.close();
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        req.setAttribute("pageName", "home");
+        req.getRequestDispatcher("WEB-INF/_layout.jsp").forward(req, resp);
     }
 }
 
@@ -52,5 +93,4 @@ HttpServlet - можна вважати аналогом контроллера 
     <servlet-name>Home</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
-
  */
