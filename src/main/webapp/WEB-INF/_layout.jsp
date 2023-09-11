@@ -41,6 +41,11 @@
     <li <% if ("servlet.jsp".equals(pageName)) { %> class="active" <% } %> >
         <a href="<%=url3%>servlet">Servlet</a>
     </li>
+    <li>
+        <!-- Modal Trigger -->
+        <a class="waves-effect waves-light btn modal-trigger red lighten-2"
+           href="#auth-modal"><span class="material-icons">login</span></a>
+    </li>
 </ul>
 
 </div>
@@ -49,8 +54,45 @@
 
 
 <jsp:include page="<%=pageName%>"/>
-<script type="text/javascript"
-src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+
+<%-- Materialize Modal (Auth block) --%>
+<!-- Modal Structure -->
+<div id="auth-modal" class="modal">
+    <div class="modal-content">
+        <div class="row">
+            <form class="col s12" method="post">
+                <div class="row">
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">account_circle</i>
+                        <input id="icon_prefix" name="icon_prefix" type="text" class="validate">
+                        <label for="icon_prefix">First Name</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">phone</i>
+                        <input id="icon_telephone" type="tel" class="validate">
+                        <label for="icon_telephone">Telephone</label>
+                    </div>
+                </div>
+                <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-red btn-flat">Agree</a>
+    </div>
+</div>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const elems = document.querySelectorAll('.modal');
+        M.Modal.init(elems, {
+            opacity: 0.5
+        } ) ;
+    });
+</script>
 </body>
 <footer class="page-footer">
 <div class="container">
