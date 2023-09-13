@@ -62,26 +62,26 @@
     <div class="modal-content">
         <div class="row">
             <form class="col s12" method="post">
-                <div class="row">
+                <div class="row valign-wrapper">
                     <div class="input-field col s6">
-                        <i class="material-icons prefix">account_circle</i>
-                        <input id="icon_prefix" name="icon_prefix" type="text" class="validate">
-                        <label for="icon_prefix">First Name</label>
+                        <i class="material-icons prefix">face</i>
+                        <input id="login" name="login" type="text" class="validate">
+                        <label for="login">Login</label>
                     </div>
                     <div class="input-field col s6">
-                        <i class="material-icons prefix">phone</i>
-                        <input id="icon_telephone" type="tel" class="validate">
-                        <label for="icon_telephone">Telephone</label>
+                        <i class="material-icons prefix">mode_edit</i>
+                        <input id="password" name="password" type="text" class="validate">
+                        <label for="password">Password</label>
                     </div>
                 </div>
-                <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+                <button class="btn waves-effect waves-light right input-field col s12" type="submit" name="action">Submit
                     <i class="material-icons right">send</i>
                 </button>
             </form>
         </div>
     </div>
     <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect waves-red btn-flat">Agree</a>
+        <a href="#!" class="modal-close waves-effect waves-red btn-flat">Close</a>
     </div>
 </div>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>

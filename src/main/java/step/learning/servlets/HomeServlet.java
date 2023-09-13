@@ -1,6 +1,7 @@
 package step.learning.servlets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import step.learning.db.dao.UserDao;
 import step.learning.servises.db.DbProvider;
 
 import javax.servlet.ServletException;
@@ -20,11 +21,8 @@ import java.util.Scanner;
 
 @Singleton
 public class HomeServlet extends HttpServlet {   // назва класу - довільна
-private final Connection connection;
     @Inject
-    public HomeServlet(DbProvider dbProvider) {
-        this.connection = dbProvider.getConnection();
-    }
+    private UserDao userDao ;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -34,21 +32,8 @@ private final Connection connection;
         request.setAttribute("text", text);
 
 
-//        String createTableSQL = "CREATE TABLE UserTest (" +
-//                "UserID CHAR(36) PRIMARY KEY," +
-//                "FirstName VARCHAR(50) NOT NULL," +
-//                "LastName VARCHAR(50) NOT NULL," +
-//                "Username VARCHAR(50) NOT NULL UNIQUE," +
-//                "Password VARCHAR(100) NOT NULL," +
-//                "Email VARCHAR(100) UNIQUE NOT NULL," +
-//                "Avatar VARCHAR(255)" +
-//                ")";
-//        try (Statement statement = connection.createStatement()) {
-//            statement.executeUpdate(createTableSQL);
-//            System.out.println("Ok.");
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
+
+
 
 
         request                              // робимо внутрішній редирект - передаємо роботу
@@ -61,6 +46,10 @@ private final Connection connection;
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         System.out.println(req.getParameter("icon_prefix"));
+
+
+
+
 //        List<String> buf = new ArrayList<>();
 //       try (FileReader reader = new FileReader("notebook.txt");
 //            Scanner scanner = new Scanner(reader)) {
