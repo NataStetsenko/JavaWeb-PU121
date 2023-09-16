@@ -14,5 +14,6 @@ public class ServletConfig extends ServletModule {
         serve( "/partsOfUrl" ).with( UrlServlet.class ) ;
         serve( "/hash" ).with( HashServlet.class ) ;
         serve( "/install" ).with( InstallServlet.class ) ;
+        serve( "/signup" ).with( SignupServlet.class ) ;
     }
 }

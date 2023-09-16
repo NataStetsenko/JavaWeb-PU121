@@ -2,7 +2,7 @@ package step.learning.filters;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import step.learning.servises.db.DbProvider;
+import step.learning.services.db.DbProvider;
 
 import javax.servlet.*;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package step.learning.servises.kdf;
+package step.learning.services.kdf;
 
 public interface KdfService {
     String getDerivedKey(String password, String salt);

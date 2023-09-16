@@ -1,8 +1,8 @@
 package step.learning.db.dao;
 
 import com.google.inject.name.Named;
-import step.learning.servises.db.DbProvider;
-import step.learning.servises.kdf.KdfService;
+import step.learning.services.db.DbProvider;
+import step.learning.services.kdf.KdfService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

@@ -1,6 +1,6 @@
-package step.learning.servises.kdf;
+package step.learning.services.kdf;
 
-import step.learning.servises.HashService;
+import step.learning.services.HashService;
 
 import javax.inject.Inject;
 

@@ -2,7 +2,7 @@ package step.learning.servlets;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import step.learning.servises.HashService;
+import step.learning.services.HashService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

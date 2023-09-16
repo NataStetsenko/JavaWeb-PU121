@@ -1,4 +1,4 @@
-package step.learning.servises;
+package step.learning.services;
 
 public class Kupina {
 

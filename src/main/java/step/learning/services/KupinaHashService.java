@@ -1,4 +1,4 @@
-package step.learning.servises;
+package step.learning.services;
 
 public class KupinaHashService implements HashService {
     private final Kupina kupina = new Kupina( 128 ) ;
