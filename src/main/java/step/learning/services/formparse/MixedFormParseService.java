@@ -1,8 +1,8 @@
 package step.learning.services.formparse;
 
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -20,15 +20,13 @@ import java.util.Map;
  */
 @Singleton
 public class MixedFormParseService implements FormParseService {
-    private static final int MEMORY_THRESHOLD = 1024 * 1024 * 3;  // 3MB
-    private static final int MAX_FILE_SIZE = 1024 * 1024 * 40; // 40MB
-    private static final int MAX_REQUEST_SIZE = 1024 * 1024 * 50; // 50MB
+    private static final int MEMORY_THRESHOLD   = 1024 * 1024 * 3;  // 3MB
+    private static final int MAX_FILE_SIZE      = 1024 * 1024 * 40; // 40MB
+    private static final int MAX_REQUEST_SIZE   = 1024 * 1024 * 50; // 50MB
 
-    private final ServletFileUpload fileUpload;
-
+    private final ServletFileUpload fileUpload ;
     @Inject
-    public MixedFormParseService() {
-
+    public MixedFormParseService( ) {
         DiskFileItemFactory factory = new DiskFileItemFactory();
         factory.setSizeThreshold(MEMORY_THRESHOLD);
         factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
@@ -47,49 +45,46 @@ public class MixedFormParseService implements FormParseService {
 //            uploadDir.mkdir();
 //        }
         // готуємо колекції для результату
-        Map<String, String> fields = new HashMap<>();
-        Map<String, FileItem> files = new HashMap<>();
-
+        Map<String, String>  fields = new HashMap<>() ;
+        Map<String, FileItem> files = new HashMap<>() ;
+        boolean isMultipart = /* ServletFileUpload.isMultipartContent( request ) */
+                request.getHeader("Content-Type").startsWith("multipart/form-data");
         // розділяємо роботу в залежності від типу запиту (multipart/urlencoded)
-        if (ServletFileUpload.isMultipartContent(request)) {  // multipart
+        if( isMultipart ) {
             try {
                 // розбираємо запит використовуючи створений у конструкторі парсер
-                for (FileItem fileItem : fileUpload.parseRequest(request)) {
+                for( FileItem fileItem : fileUpload.parseRequest( request ) ) {
                     // і перевіряємо кожну частину (part of multipart)
-                    if (fileItem.isFormField()) {     // якщо це поле форми -
+                    if( fileItem.isFormField() ) {    // якщо це поле форми -
                         fields.put(                   // то додаємо його до колекції  fields
                                 fileItem.getFieldName(),
                                 fileItem.getString("UTF-8")
-                        );
-                    } else {  // інакше - це файлова частина
+                        ) ;
+                    }
+                    else {           // інакше - це файлова частина
                         files.put(   // додаємо відомості про неї до колекції files
                                 fileItem.getFieldName(),
                                 fileItem
-                        );
+                        ) ;
                     }
                 }
-            } catch (FileUploadException | UnsupportedEncodingException ex) {
-                throw new RuntimeException(ex);
             }
-        } else {  // urlencoded
+            catch( FileUploadException | UnsupportedEncodingException ex ) {
+                throw new RuntimeException( ex ) ;
+            }
+        }
+        else {  // urlencoded
             // користуємось стандартними засобами ServletAPI
-            Enumeration<String> parameterNames = request.getParameterNames();
+            Enumeration<String> parameterNames = request.getParameterNames() ;
             // перебираємо імена всіх параметрів запиту та перекладаємо у колекцію
-            while (parameterNames.hasMoreElements()) {
-                String name = parameterNames.nextElement();
-                fields.put(name, request.getParameter(name));
+            while( parameterNames.hasMoreElements() ) {
+                String name = parameterNames.nextElement() ;
+                fields.put( name, request.getParameter( name ) ) ;
             }
         }
         return new FormParseResult() {
-            @Override
-            public Map<String, String> getFields() {
-                return fields;
-            }
-
-            @Override
-            public Map<String, FileItem> getFiles() {
-                return files;
-            }
+            @Override public Map<String, String> getFields() { return fields ; }
+            @Override public Map<String, FileItem> getFiles() { return files ; }
         };
     }
 }

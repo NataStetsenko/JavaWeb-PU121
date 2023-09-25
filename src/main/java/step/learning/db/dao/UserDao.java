@@ -1,15 +1,17 @@
 package step.learning.db.dao;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import step.learning.db.dto.User;
 import step.learning.services.db.DbProvider;
 import step.learning.services.kdf.KdfService;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -17,25 +19,92 @@ import java.util.logging.Logger;
 
 @Singleton
 public class UserDao {
-    private final DbProvider dbProvider;
-    private final KdfService kdfService;
-    private final Logger logger;
-    private final String dbPrefix;
-
+    private final DbProvider dbProvider ;
+    private final KdfService kdfService ;
+    private final Logger logger ;
+    private final String dbPrefix ;
     @Inject
-    public UserDao(DbProvider dbProvider, KdfService kdfService, Logger logger,
-                   @Named("DbPrefix") String dbPrefix) {
-        this.dbProvider = dbProvider;
-        this.kdfService = kdfService;
-        this.logger = logger;
-        this.dbPrefix = dbPrefix;
+    public UserDao( DbProvider dbProvider, KdfService kdfService, Logger logger,
+                    @Named("DbPrefix") String dbPrefix ) {
+        this.dbProvider = dbProvider ;
+        this.kdfService = kdfService ;
+        this.logger     = logger ;
+        this.dbPrefix   = dbPrefix ;
+    }
+
+    /**
+     * Authentication of user
+     * @param login
+     * @param password
+     * @return UserDTO or null
+     */
+    public User authenticate( String login, String password ) {
+        // 1. Шукаємо користувача по логіну
+        // 2. Вилучаємо сіль та ДК
+        // 3. Генеруємо ДК з солі та паролю, перевіряємо рівність збереженому ДК
+        // 4. TODO: Оновлюємо поле lastLoginDt
+        String sql = "SELECT u.* FROM " + dbPrefix + "Users u WHERE u.`login` = ?" ;
+        try( PreparedStatement prep = dbProvider.getConnection().prepareStatement( sql ) ) {
+            prep.setString( 1, login ) ;
+            ResultSet res = prep.executeQuery() ;
+            if( res.next() ) {  // є дані
+                User user = new User( res ) ;
+                if( kdfService
+                        .getDerivedKey( password, user.getSalt() )
+                        .equals( user.getPasswordDk() ) ) {
+                    return user ;
+                }
+            }  // else - до кіця, де return null ;
+        }
+        catch( SQLException ex ) {
+            logger.log(
+                    Level.SEVERE,
+                    ex.getMessage() + "--" + sql
+            ) ;
+            throw new RuntimeException(ex);
+        }
+        return null ;
+    }
+
+    public void add( User user ) {
+        String sql = "INSERT INTO " + dbPrefix + "Users (`id`, `firstName`, `lastName`,`email`," +
+                " `phone`,`birthdate`,`avatar`,`login`,`salt`,`passwordDk`,`registerDT`,`culture`,`gender`, " +
+                "`emailConfirmCode`, `phoneConfirmCode`, `roleId`)" +
+                " VALUES( ?, ?, ?, ?,?,?,?,?,?, ?, ?, ?,?,?,?,? )";
+        try( PreparedStatement prep = dbProvider.getConnection().prepareStatement(sql) ) {
+
+            prep.setString(1, user.getId()==null ? UUID.randomUUID().toString() : user.getId().toString());
+            prep.setString(2, user.getFirstName());
+            prep.setString(3, user.getLastName());
+            prep.setString(4, user.getEmail());
+            prep.setString(5, user.getPhone());
+            prep.setDate (6, new java.sql.Date(user.getBirthdate().getTime()));
+            prep.setString(7, user.getAvatar());
+            prep.setString(8, user.getLogin());
+            prep.setString(9, user.getSalt());
+            prep.setString(10, user.getPasswordDk());
+            prep.setTimestamp(11, new java.sql.Timestamp(user.getRegisterDT().getTime()));
+            prep.setString(12, user.getCulture());
+            prep.setString(13, user.getGender());
+            prep.setString(14, user.getEmailConfirmCode());
+            prep.setString(15, user.getPhoneConfirmCode());
+            prep.setString(16, user.getRoleId()==null ? null: user.getRoleId().toString());
+            prep.executeUpdate();
+        }
+        catch( SQLException ex ) {
+            logger.log(
+                    Level.SEVERE,
+                    ex.getMessage() + "--" + sql
+            ) ;
+            throw new RuntimeException(ex);
+        }
     }
 
     /**
      * CREATE TABLE and INSERT first user
      */
     public void install() {
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS " + dbPrefix + "Users (" +
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS " + dbPrefix +"Users (" +
                 "id               CHAR(36)     PRIMARY KEY," +
                 "firstName        VARCHAR(50)  NULL," +
                 "lastName         VARCHAR(50)  NULL," +
@@ -55,87 +124,63 @@ public class UserDao {
                 "banDT            DATETIME     NULL," +
                 "deleteDT         DATETIME     NULL," +
                 "roleId           CHAR(36)     NULL" +
-                ") Engine = InnoDB  DEFAULT CHARSET = utf8";
+                ") Engine = InnoDB  DEFAULT CHARSET = utf8" ;
 
-        String id = "3c15b925-5216-11ee-a481-2a78e6f43b3a";  // UUID.randomUUID().toString() ;
-        String salt = id.substring(0, 8);
-        String defaultPassword = "123";
-        String passwordDk = kdfService.getDerivedKey(defaultPassword, salt);
+        String id = "2e987203-5145-11ee-8444-966dc5fde598" ;  // UUID.randomUUID().toString() ;
+        String salt = id.substring(0, 8) ;
+        String defaultPassword = "123" ;
+        String passwordDk = kdfService.getDerivedKey( defaultPassword, salt ) ;
 
         String insertSQL = String.format(
                 "INSERT INTO %1$sUsers (id, email, `login`, salt, passwordDk) " +
                         "VALUES( '%2$s', 'admin@some.mail.com', 'admin', '%3$s', '%4$s' ) " +
                         "ON DUPLICATE KEY UPDATE salt = '%3$s', passwordDk = '%4$s' ",
                 dbPrefix, id, salt, passwordDk
-        );
+        ) ;
 
-        try (Statement statement = dbProvider.getConnection().createStatement()) {
-            statement.executeUpdate(createTableSQL);
-            statement.executeUpdate(insertSQL);
-        } catch (SQLException ex) {
+        try( Statement statement = dbProvider.getConnection().createStatement() ) {
+            statement.executeUpdate( createTableSQL ) ;
+           // statement.executeUpdate( insertSQL ) ;
+        }
+        catch( SQLException ex ) {
             logger.log(
                     Level.SEVERE,
                     ex.getMessage() + "--" + createTableSQL + "--" + insertSQL
-            );
+            ) ;
             throw new RuntimeException(ex);
         }
-    }
 
-    public void add(String firstName, String lastName, String email, String phone,
-                    Date birthdate, String avatar, String login, String defaultPassword,
-                    String culture, String gender, String roleId) throws SQLException {
-
-        String insertSQL = "INSERT INTO " + dbPrefix + "Users " +
-                "(id, firstName, lastName, " +
-                "email, phone, birthdate, avatar, login, " +
-                "salt, passwordDk, " +
-                "registerDT, " +
-                "culture, gender, roleId) " +
-                "VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?)";
-        PreparedStatement preparedStatement = dbProvider.getConnection().prepareStatement(insertSQL);
-        preparedStatement.setString(1, firstName);
-        preparedStatement.setString(2, lastName);
-        preparedStatement.setString(3, email);
-        preparedStatement.setString(4, phone);
-        if (birthdate != null) {
-            Timestamp timestamp = new Timestamp(birthdate.getTime());
-            preparedStatement.setTimestamp(5, timestamp);
-        }
-        preparedStatement.setString(6, avatar);
-        preparedStatement.setString(7, login);
-        String id = UUID.randomUUID().toString();
-        String salt = id.substring(0, 8);
-        String passwordDk = kdfService.getDerivedKey(defaultPassword, salt);
-        preparedStatement.setString(8, salt);
-        preparedStatement.setString(9, passwordDk);
-//      Timestamp timeNow = new Timestamp(System.currentTimeMillis());
-//      preparedStatement.setTimestamp(10, timeNow);
-        preparedStatement.setString(10, culture);
-        preparedStatement.setString(11, gender);
-        preparedStatement.setString(12, roleId);
-        preparedStatement.execute();
-        preparedStatement.close();
     }
 
     public void delete() throws SQLException {
-        String idUser = "eb9eec1a-5230-11ee-adbe-1e04156b55ff";
+        String idUser = "fa45f281-6c43-4642-b541-3cee255c8a83";
         String deleteSQL = "DELETE FROM " + dbPrefix + "Users WHERE id = ?";
         PreparedStatement preparedStatement = dbProvider.getConnection().prepareStatement(deleteSQL);
         preparedStatement.setString(1, idUser);
         preparedStatement.executeUpdate();
     }
-
-    public void update() {
+    public void update(String idUser) throws SQLException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String newDate = sdf.format(new Date());
         String updateSQL = "UPDATE " + dbPrefix + "Users SET " +
-                "firstName = ?, lastName = ?, " +
-                "email = ?, emailConfirmCode = ?, " +
-                "phone = ?, phoneConfirmCode = ?, " +
-                "birthdate = ?, " +
-                "avatar = ?, `login` = ?, " +
-                "salt = ?, passwordDk = ?, " +
-                "registerDT = ?, lastLoginDT= ?," +
-                "culture = ?, " + "gender = ?, " +
-                "banDT = ?, " + "deleteDT = ?, " +
-                "roleId = ?  WHERE id = ?";
+                "lastLoginDT = ?  WHERE id = ?";
+        PreparedStatement preparedStatement = dbProvider.getConnection().prepareStatement(updateSQL);
+
+        preparedStatement.setString(1, newDate );
+        preparedStatement.setString(2, idUser );
+        preparedStatement.executeUpdate();
     }
+//    public void update() {
+//        String updateSQL = "UPDATE " + dbPrefix + "Users SET " +
+//                "firstName = ?, lastName = ?, " +
+//                "email = ?, emailConfirmCode = ?, " +
+//                "phone = ?, phoneConfirmCode = ?, " +
+//                "birthdate = ?, " +
+//                "avatar = ?, `login` = ?, " +
+//                "salt = ?, passwordDk = ?, " +
+//                "registerDT = ?, lastLoginDT= ?," +
+//                "culture = ?, " + "gender = ?, " +
+//                "banDT = ?, " + "deleteDT = ?, " +
+//                "roleId = ?  WHERE id = ?";
+//    }
 }

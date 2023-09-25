@@ -3,6 +3,7 @@ package step.learning.servlets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import step.learning.db.dao.UserDao;
+import step.learning.db.dao.WebTokenDao;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -13,12 +14,15 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.UUID;
 
 @Singleton
 public class InstallServlet extends HttpServlet {
     @Inject
     private UserDao userDao;
+    @Inject
+    private WebTokenDao webTokenDao;
+
+
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -31,15 +35,15 @@ public class InstallServlet extends HttpServlet {
             throw new RuntimeException(e);
         }
         try {
-           userDao.delete();
-//            userDao.add("firstName", "lastName", "email@some.mail.com", "phone",
-//                    birthdate, "avatar", "login", "password",
-//                    "uk-UA", "gender", "3c15b925-5216-11ee-a481-2a78e6f43b3a");
-            //userDao.install() ;
+                     //  userDao.delete();
+                       webTokenDao.delete();
+//            userDao.install() ;
+           webTokenDao.install();
             resp.getWriter().print("Install OK");
         } catch (RuntimeException ex) {
             resp.getWriter().print("Install Error. Look at logs");
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }

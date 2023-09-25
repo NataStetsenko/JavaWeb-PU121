@@ -141,20 +141,21 @@
         if( ! genderInput ) throw "input id='reg-gender' not found" ;
 
          const formData = new FormData() ;
-        if( emailInput.value.trim().length < 2 ) {
-            alert( "Електронна пошта є обов'язковою" ) ;
-            return ;
-        }
+
+        // if( emailInput.value.trim().length < 2 ) {
+        //     alert( "Електронна пошта є обов'язковою" ) ;
+        //     return ;
+        // }   if( loginInput.value.trim().length < 2 ) {
+        //     alert( "Логін занадто короткий або не введений" ) ;
+        //     return ;
+        // }     if( passwordInput.value.trim().length < 2 ) {
+        //     alert( "Пароль занадто короткий або не введений" ) ;
+        //     return ;}
         formData.append( emailInput.name, emailInput.value ) ;
 
-        if( loginInput.value.trim().length < 2 ) {
-            alert( "Логін занадто короткий або не введений" ) ;
-            return ;
-        }
+
         formData.append( loginInput.name, loginInput.value ) ;
-        if( passwordInput.value.trim().length < 2 ) {
-            alert( "Пароль занадто короткий або не введений" ) ;
-            return ;}
+
         formData.append( passwordInput.name, passwordInput.value ) ;
         formData.append( nameInput.name, nameInput.value ) ;
         formData.append(lastnameInput.name, lastnameInput.value);

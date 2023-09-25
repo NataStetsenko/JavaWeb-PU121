@@ -1,6 +1,5 @@
 package step.learning.services.db;
 
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
