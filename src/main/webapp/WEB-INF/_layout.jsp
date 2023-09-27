@@ -12,8 +12,8 @@
                     request             // об'єкт request доступний у всіх JSP незалежно від сервлетів
                             .getAttribute("pageName")     // збіг імен зі змінною - не вимагається
                     + ".jsp";          // Параметри можна модифікувати
-   String javaPath = "/JavaWeb-PU121/target/JavaWeb-PU121/upload/ad5f69a1-6.jpg";
-   //String javaPath = contextPath+"/img/Java_Logo.png";
+    //String javaPath = "/JavaWeb-PU121/target/JavaWeb-PU121/upload/23a0e63d-3.jpg";
+    String javaPath = contextPath+"/img/Java_Logo.png";
 
 
 %>
@@ -51,6 +51,11 @@
                 <a class="waves-effect waves-light btn modal-trigger red lighten-2"
                    href="#auth-modal"><span class="material-icons">login</span></a>
             </li>
+            <li>
+                <div id="user-avatar" class="avatar-container" style="width: 50px; margin-top:7px; height: 50px; border-radius: 50%; overflow: hidden;">
+
+                </div>
+            </li>
         </ul>
 
     </div>
@@ -77,7 +82,7 @@
                 <label for="auth-password">Пароль</label>
             </div>
         </div>
-        <p id="result" style="color: red"></p>
+        <p id="result" style="color: red; "></p>
     </div>
     <div class="modal-footer">
         <a href="<%= contextPath %>/signup" class="modal-close waves-effect waves-green btn-flat teal lighten-3">Реєстрація</a>
@@ -111,38 +116,47 @@
 
     function loadFrontPage() {
         const token = window.localStorage.getItem('token');
+
+
+        if(!token){
+            alert("Ця сторінка вимагає автентифікації.");
+            window.location.href ="<%= contextPath %>/";
+            return;
+        }
+        try {
+            let data = JSON.parse(atob(token))
+
+        }catch (ex){
+            alert("Токен недійсний.");
+            window.location.href ="<%= contextPath %>/";
+            localStorage.removeItem('token');
+            return;
+        }
+        const tokenParse = JSON.parse(atob(localStorage.getItem('token')));
+        console.log(tokenParse.exp);
+        console.log("tokenParse.exp");
+        const currentDate = new Date();
+        const tokenDate = new Date(tokenParse.exp);
+        if (currentDate.getTime() > tokenDate.getTime()) {
+            alert("Токен минув.");
+            localStorage.removeItem('token');
+            return;
+        }
         const headers = (token == null) ? {} : {
             'Authorization': `Bearer ${token}`
         }
-        <%--fetch('<%= contextPath %>/front', {--%>
-        <%--    method: 'GET',--%>
-        <%--    headers: headers--%>
-        <%--})--%>
-        <%--    .then(response => {--%>
-        <%--        if (response.ok) {--%>
-        <%--            console.log("Avatar path:");--%>
-        <%--            return response.json();--%>
-        <%--        }--%>
-        <%--        throw new Error("not ok.");--%>
-        <%--    })--%>
-        <%--    .then(data => {--%>
-        <%--        if(data!=null){--%>
-        <%--            console.log(data);--%>
-        <%--            const imgElement = document.getElementById("javaPath");--%>
-        <%--            imgElement.src = "/JavaWeb-PU121/target/JavaWeb-PU121/upload/ad5f69a1-6.jpg";--%>
-        <%--            console.log(javaPath)--%>
-        <%--            console.log("Avatar path:", data.avatarPath);--%>
-        <%--        }--%>
-
-        <%--    })--%>
-
         fetch('<%= contextPath %>/front', {
             method: 'GET',
             headers: headers
         })
-            .then(r => r.text())
-            .then(t => {
-                console.log(t)
+            .then(r => r.json())
+            .then(j => {
+                if(typeof j.login !="undefined"){
+                    const userAvatar = document.getElementById("user-avatar");
+                    if( ! userAvatar ) throw "input id='userAvatar' not found" ;
+                    userAvatar.innerHTML = `<img style=" width: 100%; height: 100%;" src="<%= contextPath %>/upload/${j.avatar}" />`;
+                }
+                console.log(j)
             });
     }
 
@@ -195,6 +209,8 @@
 // data буде об'єктом, який містить поля statusCode та message
                 console.log(data);
                 if( data.statusCode == 200 ) {
+                    let token = JSON.parse(atob(data.message));
+                    alert(token.exp);
                     window.localStorage.setItem('token', data.message);
                     // close Material modal
                     const instance = M.Modal.getInstance(document.getElementById("auth-modal"));
@@ -212,3 +228,16 @@
 </script>
 </body>
 </html>
+
+<%--const currentDate = new Date();--%>
+<%--const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];--%>
+<%--const month = months[currentDate.getMonth()];--%>
+<%--const day = currentDate.getDate();--%>
+<%--const year = currentDate.getFullYear();--%>
+<%--const hours = currentDate.getHours();--%>
+<%--const minutes = currentDate.getMinutes();--%>
+<%--const seconds = currentDate.getSeconds();--%>
+<%--const ampm = hours >= 12 ? 'PM' : 'AM';--%>
+<%--const formattedHours = hours % 12 || 12;--%>
+<%--const formatDate = `${month} ${day}, ${year} ${formattedHours}:${minutes}:${seconds} ${ampm}`;--%>
+<%--console.log(`Create: ${formatDate}`);--%>

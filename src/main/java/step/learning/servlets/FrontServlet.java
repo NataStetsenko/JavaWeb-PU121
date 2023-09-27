@@ -1,6 +1,7 @@
 package step.learning.servlets;
 
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -41,7 +42,7 @@ public class FrontServlet extends HttpServlet {
         String authHeader = req.getHeader("Authorization") ;
         if( authHeader == null ) {
             // гостьовий режим
-            resp.getWriter().print( "Guest mode" ) ;
+            resp.getWriter().print( "\"Guest mode\"" ) ;
             return;
         }
         String pattern = "Bearer (.+)$";
@@ -54,25 +55,19 @@ public class FrontServlet extends HttpServlet {
             WebToken webToken ;
             try {
                 webToken = new WebToken( token ) ;
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
+            } catch (ParseException ignored) {
+                resp.getWriter().print( "\"Unpardonable " + token + "\"") ;
+                return;
             }
             // перевіряємо шляхом пошуку користувача
             User user = webTokenDao.getSubject( webToken ) ;
             if( user == null ) {
-                resp.getWriter().print( "Invalid token " + token ) ;
+               resp.getWriter().print( "\"Invalid token " + token + "\"") ;
                 return;
             }
-
-//            String uploadPath = getServletContext().getRealPath("") + uploadDir+ File.separator  + user.getAvatar();
-//            uploadPath = uploadPath.replace("\\", "\\\\");
-//            String json = "{\"avatarPath\":\"" + uploadPath + "\"}";
-//            resp.setContentType("application/json");
-//            String jsonString = json.toString();
-//            resp.getWriter().write(jsonString);
-            resp.getWriter().print( "Auth mode " + user.getLogin()) ;
+            resp.getWriter().print(new Gson().toJson(user));
             return;
         }
-        resp.getWriter().print( "Invalid authorization scheme" ) ;
+        resp.getWriter().print( "\"Invalid authorization scheme\"" ) ;
     }
 }
