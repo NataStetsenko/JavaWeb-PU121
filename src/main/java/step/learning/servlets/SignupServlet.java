@@ -64,6 +64,9 @@ public class SignupServlet extends HttpServlet {
             formData = new SignupFormData( req ) ;
             User user = formData.toUserDto() ;
             userDao.add( user ) ;
+
+
+
             // TODO: send confirm codes
             responseData = new ResponseData(200, "OK");
         }

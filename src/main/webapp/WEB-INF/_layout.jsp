@@ -46,6 +46,9 @@
             <li <% if ("servlet.jsp".equals(pageName)) { %> class="active" <% } %> >
                 <a href="<%=url3%>servlet">Servlet</a>
             </li>
+            <li <% if ("servlet.jsp".equals(pageName)) { %> class="active" <% } %> >
+                <a href="<%=url3%>mail">Mail</a>
+            </li>
             <li>
                 <!-- Modal Trigger -->
                 <a class="waves-effect waves-light btn modal-trigger red lighten-2"
