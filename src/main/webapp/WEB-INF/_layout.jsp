@@ -214,7 +214,9 @@
         instance.close();
         signButton.removeEventListener("click", exitClick);
         signButton.addEventListener( 'click', loginClick ) ;
-
+        setTimeout(function () {
+            window.location.href = "<%=url3%>";
+        }, 1000);
     }
     function loginClick() {
         const signButton = document.getElementById('sign-button');
