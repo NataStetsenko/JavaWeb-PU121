@@ -2,6 +2,8 @@ package step.learning.ioc;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
+import step.learning.email.EmailService;
+import step.learning.email.GmailService;
 import step.learning.services.HashService;
 import step.learning.services.KupinaHashService;
 import step.learning.services.db.DbProvider;
@@ -20,6 +22,7 @@ public class ServiceConfig extends AbstractModule {
         bind( DbProvider.class ).to( PlanetDbProvider.class ) ;
         bind( KdfService.class ).to( HashKdfService.class ) ;
         bind( FormParseService.class ).to( MixedFormParseService.class ) ;
+        bind( EmailService.class).to( GmailService.class  ) ;
 
         bind( String.class )
                 .annotatedWith( Names.named( "DbPrefix" ) )

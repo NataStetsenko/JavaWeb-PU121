@@ -8,14 +8,19 @@
     <div class="card-panel  grey lighten-5">
         <h1 class="red-text text-lighten-3">Робота з електронною поштою</h1>
         <div class="row">
-            <div class="col-s1">
+            <div class="col s12 m3">
                 <button class="waves-effect waves-light btn red lighten-2" onclick="textMailClick()">
-                    <i class="material-icons right">send</i>TEXT
+                    TEXT<i class="material-icons right">send</i>
                 </button>
             </div>
-            <div class="col-s1">
+            <div class="col s12 m3">
                 <button class="waves-effect waves-light btn red lighten-2" onclick="htmlMailClick()">
-                    <i class="material-icons right">send</i>HTML
+                    HTML<i class="material-icons right">send</i>
+                </button>
+            </div>
+            <div class="col s12 m3">
+                <button class="waves-effect waves-light btn red lighten-2" onclick="serviceMailClick()">
+                    SERVICE<i class="material-icons right">send</i>
                 </button>
             </div>
         </div>
@@ -49,6 +54,13 @@
     function htmlMailClick() {
         fetch("<%=url3%>mail", {
             method: "PATCH"
+        }).then(r => r.text()).then(t => {
+            document.getElementById("mail-result").innerText = t;
+        })
+    }
+    function serviceMailClick() {
+        fetch("<%=url3%>mail", {
+            method: "LINK"
         }).then(r => r.text()).then(t => {
             document.getElementById("mail-result").innerText = t;
         })

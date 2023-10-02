@@ -66,6 +66,7 @@
 <div>
     <img id="javaPath" src="<%= javaPath %>" width="50" class="left" style="margin-left: 50px" />
     <jsp:include page="<%= pageName %>" />
+    <div id="confirm-email"></div>
 </div>
 
 <%-- Materialize Modal (Auth block) --%>
@@ -90,7 +91,7 @@
     <div class="modal-footer">
         <a href="<%= contextPath %>/signup" class="modal-close waves-effect waves-green btn-flat teal lighten-3">Реєстрація</a>
         <a href="#!" class="modal-close waves-effect waves-green btn-flat indigo lighten-3">Забув пароль</a>
-        <a href="#!" class="waves-effect waves-green btn-flat green lighten-3" id="sign-button">Вхід</a>
+        <a href="#!" class="waves-effect waves-green btn-flat green lighten-3" id="sign-button"></a>
     </div>
 </div>
 
@@ -106,7 +107,6 @@
         window.addEventListener('hashchange', frontRouter) ;
         frontRouter() ;
     });
-
     function frontRouter() {
         console.log(location.hash);
         switch( location.hash ) {
@@ -116,11 +116,8 @@
             default:
         }
     }
-
     function loadFrontPage() {
         const token = window.localStorage.getItem('token');
-
-
         if(!token){
             alert("Ця сторінка вимагає автентифікації.");
             window.location.href ="<%= contextPath %>/";
@@ -158,22 +155,69 @@
                     const userAvatar = document.getElementById("user-avatar");
                     if( ! userAvatar ) throw "input id='userAvatar' not found" ;
                     userAvatar.innerHTML = `<img style=" width: 100%; height: 100%;" src="<%= contextPath %>/upload/${j.avatar}" />`;
+
+                    // ---------------------- CONFIRM EMAIL --------------------------
+
+                     if( typeof j.emailConfirmCode =="string"
+                         ||j.emailConfirmCode.length > 0 )
+                     {  // є код -- пошта не підтверджена
+                     const confirmDiv = document.getElementById("confirm-email");
+                     if( ! confirmDiv ) throw "confirm-email not found" ;
+                     confirmDiv.innerHTML = `Ваша пошта не підтверджена, введіть код з е-листа
+                        <div class="input-field inline" ><input id='email-code'/></div>
+                        <button onclick='confirmCodeClick()'>Підтвердити</button>` ;
+                     confirmDiv.style.border = "1px solid maroon" ;
+                     confirmDiv.style.padding = "5px 10px" ;
+                     }
                 }
                 console.log(j)
             });
     }
+    function confirmCodeClick() {
+  const email = document.getElementById("email-code")
+    if( ! email ) throw "input id='email' not found" ;
+    fetch("<%=url3%>signup?code="+ email.value, {
+        method: "PATCH",
+        headers:{
+            'Authorization': `Bearer `+ window.localStorage.getItem('token')
+        }
+    }).then(r =>{
+        if(r.status===202) {
+            const confirmDiv = document.getElementById("confirm-email");
+            if( ! confirmDiv ) throw "confirm-email not found" ;
+            confirmDiv.style.display = "none";
+            alert("Пошта підтверджена.")
+        }
+        else {
+        r.text().then(alert)
+        }})
+    console.log(email)
+}
 
     function initModalButtons() {
         const signButton = document.getElementById('sign-button');
-        if( signButton ) {
+        const token = window.localStorage.getItem('token');
+        if( !signButton ) { console.error( '#sign-button not found' ); }
+        if (!token) {
+            signButton.innerText = "Вхід";
             signButton.addEventListener( 'click', loginClick ) ;
-        }
-        else {
-            console.error( '#sign-button not found' );
+        } else {
+            signButton.innerText = "Вихід";
+            signButton.addEventListener( 'click', exitClick ) ;
         }
     }
+    function exitClick() {
+        const signButton = document.getElementById('sign-button');
+        localStorage.removeItem('token');
+        signButton.innerText = "Вхід";
+        const instance = M.Modal.getInstance(document.getElementById("auth-modal"));
+        instance.close();
+        signButton.removeEventListener("click", exitClick);
+        signButton.addEventListener( 'click', loginClick ) ;
 
+    }
     function loginClick() {
+        const signButton = document.getElementById('sign-button');
         const loginInput = document.getElementById('auth-login');
         if( ! loginInput ) throw "input id='auth-login' not found" ;
         const passwordInput = document.getElementById('auth-password');
@@ -213,10 +257,15 @@
                 console.log(data);
                 if( data.statusCode == 200 ) {
                     let token = JSON.parse(atob(data.message));
-                    alert(token.exp);
+                    alert(token.exp+"123");
                     window.localStorage.setItem('token', data.message);
                     // close Material modal
                     const instance = M.Modal.getInstance(document.getElementById("auth-modal"));
+                    signButton.innerText = "Вихід";
+                    signButton.removeEventListener("click", loginClick);
+                    signButton.addEventListener( 'click', exitClick ) ;
+                    loginInput.value = "";
+                    passwordInput.value = "";
                     instance.close();
                 }
                 else {

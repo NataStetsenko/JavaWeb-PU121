@@ -13,10 +13,13 @@ import step.learning.db.dao.UserDao;
 import step.learning.db.dao.WebTokenDao;
 import step.learning.db.dto.User;
 import step.learning.db.dto.WebToken;
+import step.learning.email.EmailService;
 import step.learning.services.formparse.FormParseResult;
 import step.learning.services.formparse.FormParseService;
 import step.learning.services.kdf.KdfService;
 
+import javax.mail.Message;
+import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -38,15 +41,56 @@ public class SignupServlet extends HttpServlet {
     private final WebTokenDao webTokenDao ;
     private final Logger logger ;
     private String uploadPath ;
-
+    private final EmailService emailService;
     @Inject
-    public SignupServlet(FormParseService formParseService, KdfService kdfService, @Named("UploadDir") String uploadDir, UserDao userDao, WebTokenDao webTokenDao, Logger logger) {
+    public SignupServlet(FormParseService formParseService, KdfService kdfService, @Named("UploadDir") String uploadDir, UserDao userDao, WebTokenDao webTokenDao, Logger logger, EmailService emailService) {
         this.formParseService = formParseService;
         this.kdfService = kdfService;
         this.uploadDir = uploadDir;
         this.userDao = userDao;
         this.webTokenDao = webTokenDao;
         this.logger = logger;
+        this.emailService = emailService;
+    }
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    {
+        switch( req.getMethod().toUpperCase() ) {
+        case "PATCH" :
+               this.doPatch( req, resp ) ;
+               break ;
+               default :
+            super.service( req, resp ) ;  // розподіл за замовчанням
+         }}
+    // Підтвердження коду e-mailprotected
+    protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    {
+        String code = req.getParameter( "code" ) ;
+        if( code == null )
+        {
+            resp.setStatus( 400 ) ;
+            resp.getWriter().print( "Missing required parameter: code" ) ;
+            return ;    }
+        String authHeader = req.getHeader("Authorization") ;
+        if( authHeader == null ) {
+            resp.setStatus( 401 ) ;
+            resp.getWriter().print( "Unauthorized" ) ;
+            return ;    }
+        User user = webTokenDao.getSubject( authHeader ) ;
+        if(user==null){
+            resp.setStatus(403);
+            resp.getWriter().print( "invalid token" ) ;
+            return;
+        }
+        if(userDao.confirmEmailCode(user, code)){
+            resp.setStatus(202);
+            resp.getWriter().print( "Code accepted" ) ;
+
+        }else{
+            resp.setStatus(203);
+            resp.getWriter().print( "Code rejected" ) ;
+            return;
+        }
     }
 
     @Override
@@ -61,16 +105,19 @@ public class SignupServlet extends HttpServlet {
         SignupFormData formData ;
         ResponseData responseData ;
         try {
-            formData = new SignupFormData( req ) ;
-            User user = formData.toUserDto() ;
-            userDao.add( user ) ;
-
-
-
-            // TODO: send confirm codes
+            formData = new SignupFormData(req);
+            User user = formData.toUserDto();
+            userDao.add(user);
+            Message message = emailService.prepareMessage();
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(user.getEmail()));
+            message.setContent(
+                    String.format(
+                            "<b>Вітаємо</b> з реєстрацією <a href='http://localhost:8080/JavaWeb_PU121/'>на сайті!</a>" +
+                                    "Для підтверження використайте код %s", user.getEmailConfirmCode())
+                    , "text/html; charset=UTF-8");
+            emailService.send(message);
             responseData = new ResponseData(200, "OK");
-        }
-        catch( Exception ex ) {
+        } catch (Exception ex) {
             logger.log( Level.SEVERE, ex.getMessage() ) ;
             responseData = new ResponseData(500, "There was an error. Look at server's logs");
         }

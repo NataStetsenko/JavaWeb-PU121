@@ -107,38 +107,38 @@ public class UserDao {
             String randomString = String.format("%06d", randomNumber);
 
 
-            Properties emailProperties = new Properties();
-            emailProperties.put("mail.smtp.auth", "true");
-            emailProperties.put("mail.smtp.starttls.enable", "true");
-            emailProperties.put("mail.smtp.host", "smtp.gmail.com");
-            emailProperties.put("mail.smtp.port", "587");
-            emailProperties.put("mail.smtp.ssl.protocols", "TLSv1.2");
-            emailProperties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
-            javax.mail.Session mailSession = javax.mail.Session.getInstance(emailProperties,
-                    new Authenticator() {
-                        @Override
-                        protected PasswordAuthentication getPasswordAuthentication() {
-                            return new PasswordAuthentication("natastetsenko44@gmail.com", "uxehuqlqodsigmdr");
-                        }
-                    }
-            );
-            MimeMessage message = new MimeMessage(mailSession);
-            try {
-                message.setFrom(new javax.mail.internet.InternetAddress("proviryalovich@gmail.com"));
-                message.setSubject("Реєстрація на JavaWeb");
-                message.setRecipients(
-                        Message.RecipientType.TO,
-                        InternetAddress.parse("natastetsenko44@gmail.com"));
-                MimeBodyPart htmlPart = new MimeBodyPart();
-                htmlPart.setContent("<b>Вітаємо</b> з реєстрацією <a href='http://localhost:8080/JavaWeb_PU121/'>на сайті!</a> Ваш код підтверження "+ randomString, "text/html; charset=UTF-8");
-                Multipart mailContent = new MimeMultipart();
-                mailContent.addBodyPart(htmlPart);
-                message.setContent(mailContent);
-                Transport.send(message);
-            } catch (MessagingException e) {
-                throw new RuntimeException(e);
-            }
-
+//            Properties emailProperties = new Properties();
+//            emailProperties.put("mail.smtp.auth", "true");
+//            emailProperties.put("mail.smtp.starttls.enable", "true");
+//            emailProperties.put("mail.smtp.host", "smtp.gmail.com");
+//            emailProperties.put("mail.smtp.port", "587");
+//            emailProperties.put("mail.smtp.ssl.protocols", "TLSv1.2");
+//            emailProperties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+//            javax.mail.Session mailSession = javax.mail.Session.getInstance(emailProperties,
+//                    new Authenticator() {
+//                        @Override
+//                        protected PasswordAuthentication getPasswordAuthentication() {
+//                            return new PasswordAuthentication("natastetsenko44@gmail.com", "uxehuqlqodsigmdr");
+//                        }
+//                    }
+//            );
+//            MimeMessage message = new MimeMessage(mailSession);
+//            try {
+//                message.setFrom(new javax.mail.internet.InternetAddress("proviryalovich@gmail.com"));
+//                message.setSubject("Реєстрація на JavaWeb");
+//                message.setRecipients(
+//                        Message.RecipientType.TO,
+//                        InternetAddress.parse("natastetsenko44@gmail.com"));
+//                MimeBodyPart htmlPart = new MimeBodyPart();
+//                htmlPart.setContent("<b>Вітаємо</b> з реєстрацією <a href='http://localhost:8080/JavaWeb_PU121/'>на сайті!</a> Ваш код підтверження "+ randomString, "text/html; charset=UTF-8");
+//                Multipart mailContent = new MimeMultipart();
+//                mailContent.addBodyPart(htmlPart);
+//                message.setContent(mailContent);
+//                Transport.send(message);
+//            } catch (MessagingException e) {
+//                throw new RuntimeException(e);
+//            }
+//
         } catch (SQLException ex) {
             logger.log(
                     Level.SEVERE,
@@ -147,7 +147,20 @@ public class UserDao {
             throw new RuntimeException(ex);
         }
     }
-
+    public boolean confirmEmailCode( User user, String code ) {
+        if( user == null
+                || code == null
+                || ! code.equals( user.getEmailConfirmCode() )     )
+        {        return false ;    }
+        String sql = "UPDATE " + dbPrefix + "Users SET emailConfirmCode = NULL WHERE id = ?";
+        try (PreparedStatement preparedStatement = dbProvider.getConnection().prepareStatement(sql);)
+        {
+            preparedStatement.setString(1, user.getId().toString());
+            preparedStatement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }}
     /**
      * CREATE TABLE and INSERT first user
      */
@@ -200,7 +213,7 @@ public class UserDao {
     }
 
     public void delete() throws SQLException {
-        String idUser = "fa45f281-6c43-4642-b541-3cee255c8a83";
+        String idUser = "a8147a62-01c9-44e7-aac4-ae42bfe7b2e1";
         String deleteSQL = "DELETE FROM " + dbPrefix + "Users WHERE id = ?";
         PreparedStatement preparedStatement = dbProvider.getConnection().prepareStatement(deleteSQL);
         preparedStatement.setString(1, idUser);

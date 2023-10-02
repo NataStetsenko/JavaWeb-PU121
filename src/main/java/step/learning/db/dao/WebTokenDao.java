@@ -1,5 +1,6 @@
 package step.learning.db.dao;
 
+import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import step.learning.db.dto.User;
@@ -7,12 +8,15 @@ import step.learning.db.dto.WebToken;
 import step.learning.services.db.DbProvider;
 
 import java.sql.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class WebTokenDao {
     private final DbProvider dbProvider ;
@@ -107,7 +111,19 @@ public class WebTokenDao {
             }
         }
         }
+    public User getSubject( String header ) {
 
+        String pattern = "Bearer (.+)$";
+        Pattern regex = Pattern.compile(pattern);
+        Matcher matches = regex.matcher(header);
+        if (matches.find()) {
+            try {
+                return this.getSubject(new WebToken(matches.group(1)));
+            } catch (ParseException ignored) {
+            }
+
+        } return null;
+    }
     public User getSubject( WebToken token ) {
         if( token == null ||
                 token.getId() == null ||

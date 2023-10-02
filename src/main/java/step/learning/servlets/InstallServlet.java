@@ -35,7 +35,7 @@ public class InstallServlet extends HttpServlet {
             throw new RuntimeException(e);
         }
         try {
-                     //  userDao.delete();
+                       userDao.delete();
                        webTokenDao.delete();
 //            userDao.install() ;
            webTokenDao.install();

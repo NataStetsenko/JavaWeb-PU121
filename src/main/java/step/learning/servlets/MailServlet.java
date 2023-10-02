@@ -1,6 +1,8 @@
 package step.learning.servlets;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import step.learning.email.EmailService;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -9,19 +11,23 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Properties;
 
 @Singleton
 public class MailServlet extends HttpServlet {
+    private final EmailService emailService;
+
+    @Inject
+    public MailServlet(EmailService emailService) {
+        this.emailService = emailService;
+    }
+
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // метод викликається до того, як відбувається розподіл за doXxx методами,
@@ -32,6 +38,9 @@ public class MailServlet extends HttpServlet {
                 break;
             case "PATCH":
                 this.doPatch(req, resp);
+                break;
+            case "LINK":
+                this.doLink(req, resp);
                 break;
             default:
                 super.service(req, resp);  // розподіл за замовчанням
@@ -96,10 +105,10 @@ public class MailServlet extends HttpServlet {
             textPart.setContent("Вітаємо з реєстраціє на сайті!", "text/html; charset=UTF-8");
 
             String name = "qwert.png";
-//         String path = this.getClass().getClassLoader().getResource(name).getPath();
+            String path = URLDecoder.decode(this.getClass().getClassLoader().getResource(name).getPath());
 //                        /D:/Working%20folder/Java/JavaWeb-PU121/target/JavaWeb-PU121/WEB-INF/classes/qwert.png
 
-           String path = "D:\\Working folder\\Java\\JavaWeb-PU121\\target\\classes\\qwert.png";
+//           String path = "D:\\Working folder\\Java\\JavaWeb-PU121\\target\\classes\\qwert.png";
 //         String path = "D:\\Working folder\\Java\\JavaWeb-PU121\\target\\JavaWeb-PU121\\WEB-INF\\classes";
 
 //         ServletContext context = getServletContext();
@@ -127,6 +136,22 @@ public class MailServlet extends HttpServlet {
 
         } catch (MessagingException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    protected void doLink(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            Message message = emailService.prepareMessage();
+            message.setRecipients(
+                    // Одержувачів також перекладаємо у повідомлення
+                    Message.RecipientType.TO,
+                    InternetAddress.parse("natastetsenko44@gmail.com"));
+            message.setContent("<b>Вітаємо</b> з реєстрацією на <a href='http://localhost:8080/JavaWeb_PU121/'>сайті</a>!",
+                    "text/html; charset=UTF-8");
+            emailService.send(message);
+            resp.getWriter().print("Multipart sent");
+        } catch (Exception ex) {
+            resp.getWriter().print(ex.getMessage());
         }
     }
 
